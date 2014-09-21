@@ -1,5 +1,6 @@
 using PhilipsHue
 using Base.Test
 
-# write your own tests here
-@test 1 == 1
+# no idea how to test this yet
+
+@test beginswith(getIP(), "192") == true
