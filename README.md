@@ -4,7 +4,7 @@ A few simple functions to control Philips Hue light bulbs from Julia.
 
 ## Usage
 
-If you know your Philips Hue bridge's IP address and existing username.
+If you know your Philips Hue bridge's IP address and existing username:
  
      using PhilipsHue
      B = PhilipsHueBridge("192.168.1.111", "yourusername")
@@ -15,7 +15,7 @@ But if you don't, try initializing it:
     B = PhilipsHueBridge("", "")
     initialize(B, devicetype="test developer", username="yourusername")
 
-where "yourusername" must be at least 10 characters long. You'll have to run to the bridge and hit the button:
+where "yourusername" must be at least 10 characters long. You'll have to run to the bridge and hit the button (or perhaps you can hit the button then try to initialize within 10 seconds, I haven't tried that):
 
     Trying to get the IP address of the Philips bridge...
     Trying to register test developer and yourusername to the bridge at 192.168.1.111...
@@ -24,7 +24,7 @@ where "yourusername" must be at least 10 characters long. You'll have to run to 
     Registration successful
     true
 
-B now represents your bridge.
+B now represents your bridge, and most of the functions require this as the first argument.
 
 ## Setting light parameters
     
@@ -62,6 +62,15 @@ For example:
 Get information for all lights:
 
     get_all_lights(B)
+    
+For example:
+
+    julia> get_all_lights(B)
+    Dict{String,Any} with 3 entries:
+      "1" => ["name"=>"Hue Lamp","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none",…
+      "2" => ["name"=>"Hue Lamp 1","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
+      "3" => ["name"=>"Hue Lamp 2","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
+
 
 Get information for one light:
 
@@ -71,8 +80,8 @@ For example:
     
     julia> get_light(B, 2)
     
-    returns (true,25,254,15000)
+    returns (true,25,254,15000) - O, Saturation, Brightness, Hue
 
 ## Problems, issues
 
-In practice, the only problem at the moment is that Julia (version 0.3) takes a few seconds to load Requests.jl and JSON.jl...
+In practice, the only problem at the moment is that Julia (version 0.3) takes a few seconds to load Requests.jl and JSON.jl... :)

@@ -17,13 +17,13 @@ end
 function getIP()
   # read the bridge's settings from the meethue.com site
 	response = get("https://www.meethue.com/api/nupnp")
-	bridgeinfo = JSON.parse(response.data; ordered=true)
-	ipaddress = bridgeinfo[1]["internalipaddress"]
+	bridgeinfo = JSON.parse(response.data)
+	return bridgeinfo[1]["internalipaddress"]
 end
 
 function get_bridge_config(bridge::PhilipsHueBridge)
   response = get("http://$(bridge.ip)/api/$(bridge.username)/config")
-	return JSON.parse(response.data; ordered=true)
+	return JSON.parse(response.data)
 end
 
 function isinitialized(bridge::PhilipsHueBridge)
@@ -36,12 +36,12 @@ end
 
 function get_all_lights(bridge::PhilipsHueBridge)
   response = get("http://$(bridge.ip)/api/$(bridge.username)/lights")
- 	return JSON.parse(response.data; ordered=true)
+ 	return JSON.parse(response.data)
 end
 
 function get_light(bridge::PhilipsHueBridge, light=1)
   response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
- 	responsedata = JSON.parse(response.data; ordered=true)
+ 	responsedata = JSON.parse(response.data)
  	# return tuple of some information
   return (
     responsedata["state"]["on"],
@@ -55,8 +55,7 @@ end
 
 Set a light by passing a dict of settings. 
 Typically this dict is eg {"on" => true, "sat" => 123, "bri" => 123, "hue" => 123}, 
-where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?)
-where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc.
+where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?) where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc.
 
 If keys are omitted, that aspect of the light won't be changed.
 
@@ -97,15 +96,15 @@ function register(bridge_ip; devicetype="juliascript", username="juliauser1")
   # 1-element Array{Any,1}:
   #   ["error"=>["type"=>101,"description"=>"link button not pressed","address"=>"/"]]
   if responsedata[1][first(keys(responsedata[1]))]["description"] == "link button not pressed"
-    println("Quick, you have ten seconds to press the button on the bridge!")
+    println("register(): Quick, you have ten seconds to press the button on the bridge!")
     sleep(10)
     response = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)\",\"username\":\"$(username)\"}")
     responsedata = JSON.parse(response.data)
     if first(keys(responsedata[1])) == "success"
-      println("successfully added $devicetype and $username to the bridge at $bridge_ip")
+      println("register(): Successfully registered $devicetype and $username in the bridge at $bridge_ip")
       return true
     else
-      println("failed to add $devicetype and $username to the bridge at $bridge_ip")
+      println("register(): Failed to register $devicetype and $username in the bridge at $bridge_ip")
       return false
     end
   end
@@ -126,17 +125,18 @@ function test_all_lights(bridge::PhilipsHueBridge)
 end
 
 function initialize(bridge::PhilipsHueBridge; devicetype="juliascript", username="juliauser1") 
-  println("Trying to get the IP address of the Philips bridge...")
+  println("initialize(): Trying to get the IP address of the Philips bridge.")
   ipaddress = getIP()
   bridge.ip = ipaddress
-  println("Trying to register $devicetype and $username to the bridge at $(bridge.ip)...")
+  println("initialize(): Found bridge at $(bridge.ip).") 
+  println("initialize(): Trying to register $devicetype and $username to the bridge at $(bridge.ip)...")
   status = register(bridge.ip, devicetype=devicetype, username=username)
   if status
-    println("Registration successful")
+    println("initialize(): Registration successful")
     bridge.username = username
     return true
   else
-    println("Registration failed")
+    println("initialize(): Registration failed")
     return false
   end
 end
