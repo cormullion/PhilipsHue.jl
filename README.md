@@ -9,7 +9,7 @@ If you know your Philips Hue bridge's IP address and existing username.
      using PhilipsHue
      B = PhilipsHueBridge("192.168.1.111", "yourusername")
 
-But if you don't:
+But if you don't, try initializing it:
 
     using PhilipsHue
     B = PhilipsHueBridge("", "")
@@ -24,19 +24,26 @@ where "yourusername" must be at least 10 characters long. You'll have to run to 
     Registration successful
     true
 
-## Functions    
+B now represents your bridge.
+
+## Setting light parameters
     
-    test_all_lights(B)
-    
-does a few quick flashes.
-    
-Use a dictionary with one or more key/value pairs. Typically this dict is eg {"on" => true, "sat" => 123, "bri" => 123, "hue" => 123}, where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?), where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc. If keys are omitted, that aspect of the light won't be changed. Keys are strings, values can be numeric and will get converted to strings.
+To set the parameters of a light, pass a dictionary with one or more key/value pairs to one of the `set_` functions. Typically this dict is something like this: 
+
+	{"on" => true, "sat" => 123, "bri" => 123, "hue" => 123}
+	
+where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?), where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc. If keys are omitted, that aspect of the light won't be changed. Keys are strings, values can be numeric and will get converted to strings.
 
     set_light(B, 1, {"on" => false}
     set_light(B, 1, {"on" => true, "hue" => 10000}
-
     set_light_group(B, {"sat" => 255, "bri" => 255, "hue" => 20000, "on" => true})
     set_light_group(B, {"sat" => 25,  "on" => true})
+
+### Other functions
+
+    test_all_lights(B)
+    
+does a few quick flashes.
 
 Get the bridge's IP address:
 
@@ -59,6 +66,8 @@ Get information for all lights:
 Get information for one light:
 
     get_light(B, 2)
+
+For example:
     
     julia> get_light(B, 2)
     
@@ -66,4 +75,4 @@ Get information for one light:
 
 ## Problems, issues
 
-The main problem at the moment is that Julia (version 0.3) takes a few seconds to load Requests.jl and JSON.jl... :)
+In practice, the only problem at the moment is that Julia (version 0.3) takes a few seconds to load Requests.jl and JSON.jl...
