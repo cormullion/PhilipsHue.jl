@@ -80,7 +80,7 @@ For example:
     
     julia> get_light(B, 2)
     
-    returns (true,25,254,15000) - O, Saturation, Brightness, Hue
+    returns (true,25,254,15000) - On, Saturation, Brightness, Hue
 
 ## Problems, issues
 
