@@ -1,7 +1,7 @@
 module PhilipsHue
 
 export  PhilipsHueBridge, getIP, get_bridge_config, isinitialized,
-        get_all_lights, get_light, set_light, set_light_group, test_lights,
+        get_all_lights, get_light, set_light, set_light_group, test_all_lights,
         register, initialize
 
 using JSON, Requests
