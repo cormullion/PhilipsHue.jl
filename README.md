@@ -2,20 +2,32 @@
 
 A few simple functions to control Philips Hue light bulbs from Julia.
 
+Uses JSON and Requests packages.
+
+## Current status
+
+Works OK for Julia version 0.3.* — won't work for Julia version 0.4. 
+
 ## Usage
 
-If you know your Philips Hue bridge's IP address and existing username:
+If you already know your Philips Hue bridge's IP address and existing username:
  
-     using PhilipsHue
-     B = PhilipsHueBridge("192.168.1.111", "yourusername")
+    using PhilipsHue
+    B = PhilipsHueBridge("192.168.1.111", "yourusername")
 
-But if you don't, try initializing it:
+If you don't know the current IP address, try:
+
+	 getIP()
+
+which accesses your current configuration as registered at http://meethue.com. 
+
+If you haven't added your username to the bridge, try initializing it:
 
     using PhilipsHue
     B = PhilipsHueBridge("", "")
     initialize(B, devicetype="test developer", username="yourusername")
 
-where "yourusername" must be at least 10 characters long. You'll have to run to the bridge and hit the button (or perhaps you can hit the button then try to initialize within 10 seconds, I haven't tried that):
+where "yourusername" must be *at least* 10 characters long. You'll have to run to the bridge and hit the button (or perhaps you can hit the button then try to initialize within 10 seconds, I haven't tried that):
 
     Trying to get the IP address of the Philips bridge...
     Trying to register test developer and yourusername to the bridge at 192.168.1.111...
@@ -24,7 +36,13 @@ where "yourusername" must be at least 10 characters long. You'll have to run to 
     Registration successful
     true
 
-B now represents your bridge, and most of the functions require this as the first argument.
+``B`` now represents your bridge, and most of the functions require this as the first argument.
+
+To test:
+
+    test_all_lights(B)
+
+does a few quick flashes.	
 
 ## Setting light parameters
     
@@ -38,31 +56,38 @@ where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is 
     set_light(B, 1, {"on" => true, "hue" => 10000}
     set_light_group(B, {"sat" => 255, "bri" => 255, "hue" => 20000, "on" => true})
     set_light_group(B, {"sat" => 25,  "on" => true})
+    
+Note that this syntax is specific to Julia version 0.3.*, and probably won't work for later versions.
 
 ### Other functions
 
-    test_all_lights(B)
-    
-does a few quick flashes.
-
-Get the bridge's IP address:
+Get the bridge's current registered IP address (which can usually be read from `http://meethue.com` using `get("https://www.meethue.com/api/nupnp")`):
 
     getIP()
 
-Get the main bridge configuration:
+Get the current bridge configuration:
 
     get_bridge_config(B)
 
-For example:
+which returns a dictionary with keys such as "timezone", "apiversion", "paddles", "whitelist", and so on. You can obtain specific values:
 
     julia> get_bridge_config(B)["apiversion"]
     
-    returns "1.3.0"
+returns 
     
+    "1.3.0"
+    
+A list of current approved apps and users is stored in the whitelist:
+
+    get_bridge_config(B)["whitelist"]
+	 Dict{String,Any} with 22 entries:
+      "newdeveloper" => ["name"=>"test user","last use date"=>"2014-12-20T18:08:45","create date"=>"2014-02-04T08:50:28"]
+	  ...
+
 Get information for all lights:
 
-    get_all_lights(B)
-    
+	   get_all_lights(B)
+	    
 For example:
 
     julia> get_all_lights(B)
@@ -72,7 +97,7 @@ For example:
       "3" => ["name"=>"Hue Lamp 2","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
 
 
-Get information for one light:
+Get information for a specific light:
 
     get_light(B, 2)
 

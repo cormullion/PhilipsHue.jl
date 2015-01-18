@@ -55,7 +55,9 @@ end
 
 Set a light by passing a dict of settings. 
 Typically this dict is eg {"on" => true, "sat" => 123, "bri" => 123, "hue" => 123}, 
-where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?) where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc.
+where "sat" and "bri" are saturation and brightness from 0 to 255, 
+and "hue" is from 0 to 65280 (?) where 
+0 is red, yellow is 12750, green is 25500, blue is 46920, etc.
 
 If keys are omitted, that aspect of the light won't be changed.
 
@@ -80,13 +82,13 @@ set all lights, the same as sending the same set_light settings to each light
 =# 
 
 function set_light_group(bridge::PhilipsHueBridge, settings::Dict)
-  state = {}
-  for (k, v) in settings
-     push!(state,("\"$k\": $(string(v))"))
-  end
-  state = "{" * join(state, ",") * "}"
-  response = put("http://$(bridge.ip)/api/$(bridge.username)/groups/0/action", data="$(state)") 
-  return JSON.parse(response.data)
+    state = {}
+    for (k, v) in settings
+        push!(state,("\"$k\": $(string(v))"))
+    end
+    state = "{" * join(state, ",") * "}"
+    response = put("http://$(bridge.ip)/api/$(bridge.username)/groups/0/action", data="$(state)") 
+    return JSON.parse(response.data)
 end
 
 function register(bridge_ip; devicetype="juliascript", username="juliauser1")
@@ -101,44 +103,40 @@ function register(bridge_ip; devicetype="juliascript", username="juliauser1")
     response = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)\",\"username\":\"$(username)\"}")
     responsedata = JSON.parse(response.data)
     if first(keys(responsedata[1])) == "success"
-      println("register(): Successfully registered $devicetype and $username in the bridge at $bridge_ip")
-      return true
+        println("register(): Successfully registered $devicetype and $username in the bridge at $bridge_ip")
+        return true
     else
-      println("register(): Failed to register $devicetype and $username in the bridge at $bridge_ip")
-      return false
+        println("register(): Failed to register $devicetype and $username in the bridge at $bridge_ip")
+        return false
     end
   end
 end 
 
-function test_all_lights(bridge::PhilipsHueBridge)
-  for i in 1:5
-    set_light_group(bridge, {"hue" => 10000,               "bri" => 25})
-    sleep(1)
-    set_light_group(bridge, {"hue" => 30000, "sat" => 128, "bri" => 128})
-    sleep(1)
-    set_light_group(bridge, {"on" => false})
-    sleep(1)
-    set_light_group(bridge, {"on" => true})
-    sleep(1)
-    set_light_group(bridge, {"hue" => 10000, "sat" => 255, "bri" => 255})
-  end
+function test_all_lights(bridge::PhilipsHueBridge, total=5)
+    for i in 1:total
+        set_light_group(bridge, {"on" => false})
+        sleep(1)
+        set_light_group(bridge, {"on" => true})
+        sleep(1)
+    end
+    set_light_group(bridge, {"hue" => 10000, "sat" => 64, "bri" => 255})
 end
 
 function initialize(bridge::PhilipsHueBridge; devicetype="juliascript", username="juliauser1") 
-  println("initialize(): Trying to get the IP address of the Philips bridge.")
-  ipaddress = getIP()
-  bridge.ip = ipaddress
-  println("initialize(): Found bridge at $(bridge.ip).") 
-  println("initialize(): Trying to register $devicetype and $username to the bridge at $(bridge.ip)...")
-  status = register(bridge.ip, devicetype=devicetype, username=username)
-  if status
-    println("initialize(): Registration successful")
-    bridge.username = username
-    return true
-  else
-    println("initialize(): Registration failed")
-    return false
-  end
+    println("initialize(): Trying to get the IP address of the Philips bridge.")
+    ipaddress = getIP()
+    bridge.ip = ipaddress
+    println("initialize(): Found bridge at $(bridge.ip).") 
+    println("initialize(): Trying to register $devicetype and $username to the bridge at $(bridge.ip)...")
+    status = register(bridge.ip, devicetype=devicetype, username=username)
+    if status
+        println("initialize(): Registration successful")
+        bridge.username = username
+        return true
+    else
+        println("initialize(): Registration failed")
+        return false
+    end
 end
 
 end # module
