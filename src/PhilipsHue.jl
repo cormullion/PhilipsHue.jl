@@ -14,8 +14,10 @@ type PhilipsHueBridge
   end
 end
 
+#@doc doc"""
+#    Read the bridge's settings from the [meethue.com]("https://www.meethue.com/api/nupnp")
+#  """ ->
 function getIP()
-  # read the bridge's settings from the meethue.com site
 	response = get("https://www.meethue.com/api/nupnp")
 	bridgeinfo = JSON.parse(response.data)
 	return bridgeinfo[1]["internalipaddress"]
