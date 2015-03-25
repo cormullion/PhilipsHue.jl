@@ -19,7 +19,13 @@ end
 #  """ ->
 function getIP()
 	response = get("https://www.meethue.com/api/nupnp")
-	bridgeinfo = JSON.parse(response.data)
+    # this url sometimes redirects, we should follow...
+	if response.status == 302
+	    println("trying curl instead, in case of redirects")
+        bridgeinfo = JSON.parse(readall(`curl -sL http://www.meethue.com/api/nupnp`))
+	else
+	    bridgeinfo = JSON.parse(response.data)
+	end
 	return bridgeinfo[1]["internalipaddress"]
 end
 
@@ -37,19 +43,19 @@ function isinitialized(bridge::PhilipsHueBridge)
 end
 
 function get_all_lights(bridge::PhilipsHueBridge)
-  response = get("http://$(bridge.ip)/api/$(bridge.username)/lights")
+    response = get("http://$(bridge.ip)/api/$(bridge.username)/lights")
  	return JSON.parse(response.data)
 end
 
 function get_light(bridge::PhilipsHueBridge, light=1)
-  response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
+    response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
  	responsedata = JSON.parse(response.data)
  	# return tuple of some information
-  return (
-    responsedata["state"]["on"],
-    responsedata["state"]["sat"],
-    responsedata["state"]["bri"],
-    responsedata["state"]["hue"]
+    return (
+     responsedata["state"]["on"],
+     responsedata["state"]["sat"],
+     responsedata["state"]["bri"],
+     responsedata["state"]["hue"]
   )
 end
 
@@ -57,8 +63,8 @@ end
 
 Set a light by passing a dict of settings. 
 Typically this dict is eg {"on" => true, "sat" => 123, "bri" => 123, "hue" => 123}, 
-where "sat" and "bri" are saturation and brightness from 0 to 255, 
 and "hue" is from 0 to 65280 (?) where 
+where "sat" and "bri" are saturation and brightness from 0 to 255, 
 0 is red, yellow is 12750, green is 25500, blue is 46920, etc.
 
 If keys are omitted, that aspect of the light won't be changed.
