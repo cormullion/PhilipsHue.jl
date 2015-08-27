@@ -2,32 +2,32 @@
 
 A few simple functions to control Philips Hue light bulbs from Julia.
 
-Uses JSON and Requests packages.
+Uses JSON and Requests packages, and Compat for compatibility between version 0.3 and 0.4.
 
 ## Current status
 
-Works OK for Julia version 0.3.* — won't work for Julia version 0.4. 
+Updated to work with Julia versions 0.3 and 0.4.
 
 ## Usage
 
 If you already know your Philips Hue bridge's IP address and existing username:
- 
+
     using PhilipsHue
-    B = PhilipsHueBridge("192.168.1.111", "yourusername")
+    B = PhilipsHueBridge("192.168.1.111", "username")
 
 If you don't know the current IP address, try:
 
 	 getIP()
 
-which accesses your current configuration as registered at http://meethue.com. 
+which accesses your current configuration as registered at http://meethue.com.
 
 If you haven't added your username to the bridge, try initializing it:
 
     using PhilipsHue
     B = PhilipsHueBridge("", "")
-    initialize(B, devicetype="test developer", username="yourusername")
+    initialize(B, devicetype="test developer", username="username")
 
-where "yourusername" must be *at least* 10 characters long. You'll have to run to the bridge and hit the button (or perhaps you can hit the button then try to initialize within 10 seconds, I haven't tried that):
+where "theusername" must be *at least* 10 characters long. You'll have to run to the bridge and hit the button (or perhaps you can hit the button then try to initialize within 10 seconds, I haven't tried that):
 
     Trying to get the IP address of the Philips bridge...
     Trying to register test developer and yourusername to the bridge at 192.168.1.111...
@@ -38,26 +38,30 @@ where "yourusername" must be *at least* 10 characters long. You'll have to run t
 
 ``B`` now represents your bridge, and most of the functions require this as the first argument.
 
+Philips are in the process of deprecating usernames, by the way.
+
 To test:
 
-    test_all_lights(B)
+    testlights(B)
 
-does a few quick flashes.	
+does a few quick flashes.
 
 ## Setting light parameters
-    
-To set the parameters of a light, pass a dictionary with one or more key/value pairs to one of the `set_` functions. Typically this dict is something like this: 
 
-	{"on" => true, "sat" => 123, "bri" => 123, "hue" => 123}
-	
+To set the parameters of a light, pass a dictionary with one or more key/value pairs to one of the `set` functions. Typically this dict is something like this:
+
+    Dict{Any,Any}("bri" => rand(0:255), "hue" => rand(1:65000), "sat" => rand(1:255))
+
 where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?), where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc. If keys are omitted, that aspect of the light won't be changed. Keys are strings, values can be numeric and will get converted to strings.
 
-    set_light(B, 1, {"on" => false}
-    set_light(B, 1, {"on" => true, "hue" => 10000}
-    set_light_group(B, {"sat" => 255, "bri" => 255, "hue" => 20000, "on" => true})
-    set_light_group(B, {"sat" => 25,  "on" => true})
-    
-Note that this syntax is specific to Julia version 0.3.*, and probably won't work for later versions.
+    setlight(B, 1, Dict{Any,Any}("on" => false)
+    setlight(B, 1, Dict{Any,Any}("on" => true, "hue" => 10000)
+    setlights(B, Dict{Any,Any}("sat" => 255, "bri" => 255, "hue" => 20000, "on" => true))
+    setlights(B, Dict{Any,Any}("sat" => 25,  "on" => true))
+
+Note that this syntax is specific to Julia version 0.4. For version 3, use the simple untyped dictionary syntax:
+
+    {"bri" => rand(0:255), "hue" => rand(1:65000), "sat" => rand(1:255)}
 
 ### Other functions
 
@@ -67,46 +71,53 @@ Get the bridge's current registered IP address (which can usually be read from `
 
 Get the current bridge configuration:
 
-    get_bridge_config(B)
+    getbridgeconfig(B)
 
 which returns a dictionary with keys such as "timezone", "apiversion", "paddles", "whitelist", and so on. You can obtain specific values:
 
-    julia> get_bridge_config(B)["apiversion"]
-    
-returns 
-    
+    getbridgeconfig(B)["apiversion"]
+
+returns
+
     "1.3.0"
-    
+
 A list of current approved apps and users is stored in the whitelist:
 
-    get_bridge_config(B)["whitelist"]
-	 Dict{String,Any} with 22 entries:
-      "newdeveloper" => ["name"=>"test user","last use date"=>"2014-12-20T18:08:45","create date"=>"2014-02-04T08:50:28"]
+    getbridgeconfig(B)["whitelist"]
+    Dict{AbstractString,Any} with 25 entries:
+      "lSsXQfrm7rC32SQ0"                 => Dict{AbstractString,Any}("name"=>"fred’s iPhone","last use date"=>"2015-08-27T10:32:24","create date"=>"2013-12-31T14:05:05")
+      "352f5a4637d93da7121471aa39dc2db"  => Dict{AbstractString,Any}("name"=>"Harmony","last use date"=>"2014-10-13T04:56:30","create date"=>"2014-09-06T12:15:28")
+      "5F062ECE840DB0FE8D468855570D2EB9" => Dict{AbstractString,Any}("name"=>"QuickHue","last use date"=>"2014-01-09T14:47:13","create date"=>"2014-01-01T12:24:36")
+      "0f607264fc6318a92b9e13c65db7cd3c" => Dict{AbstractString,Any}("name"=>"fred’s iPad","last use date"=>"2014-01-03T00:13:28","create date"=>"2013-12-31T13:10:36")
+      "hue-js-JkRkZIa8Lasd"              => Dict{AbstractString,Any}("name"=>"Philips hue JavaScript","last use date"=>"2015-06-12T13:34:00","create date"=>"2015-06-12T13:26:00")
+      "newjuliauser2"                    => Dict{AbstractString,Any}("name"=>"test developer","last use date"=>"2014-09-21T14:30:18","create date"=>"2014-09-21T13:40:11")
+      "q3a619KRfwoS6suF"                 => Dict{AbstractString,Any}("name"=>"HueForAppleWatch#fred’s iPhone 6","last use date"=>"2015-08-20T22:47:41","create date"=>"2015-08-20T16:50:32")
+      "juliauser1"                       => Dict{AbstractString,Any}("name"=>"juliascript","last use date"=>"2015-08-27T15:06:43","create date"=>"2014-09-21T10:30:53")
 	  ...
 
 Get information for all lights:
 
-	   get_all_lights(B)
-	    
+	   getlights(B)
+
 For example:
 
-    julia> get_all_lights(B)
+    getlights(B)
+
     Dict{String,Any} with 3 entries:
       "1" => ["name"=>"Hue Lamp","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none",…
       "2" => ["name"=>"Hue Lamp 1","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
       "3" => ["name"=>"Hue Lamp 2","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
 
-
 Get information for a specific light:
 
-    get_light(B, 2)
+    getlight(B, 2)
 
 For example:
-    
-    julia> get_light(B, 2)
-    
-    returns (true,25,254,15000) - On, Saturation, Brightness, Hue
+
+    getlight(B, 2)
+
+returns (true,25,254,15000) - On, Saturation, Brightness, Hue
 
 ## Problems, issues
 
-In practice, the only problem at the moment is that Julia (version 0.3) takes a few seconds to load Requests.jl and JSON.jl... :)
+In practice, the only problem at the moment is that Julia takes a few seconds to load Requests.jl and JSON.jl... :)
