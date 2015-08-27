@@ -1,12 +1,9 @@
 tic()
-using Base.Test, Compat
-
-include("/Users/pete/.julia/v0.3/PhilipsHue/src/PhilipsHue.jl")
-using PhilipsHue
+using Base.Test, Compat, using PhilipsHue
 
 println("loaded PhilipsHue, Test, Compat")
 
-B = PhilipsHueBridge("192.168.1.90", "yourusername")
+B = PhilipsHueBridge("192.168.1.90", "username")
 println(getbridgeconfig(B))
 println(getIP())
 println(getlights(B))
