@@ -6,7 +6,21 @@ Uses JSON and Requests packages, and Compat for compatibility between version 0.
 
 ## Current status
 
-Updated to work with Julia versions 0.3 and 0.4.
+Updated to work with Julia versions 0.4.
+
+## Summary
+
+    B = PhilipsHueBridge("192.168.1.xx", "existingusername")
+    getIP()
+    getbridgeconfig(B)
+    initialize(B; devicetype="juliascript", username="juliauser1")
+    isinitialized(B)
+    register("192.168.1.xx"; devicetype="juliascript", username="juliauser1")
+    getlight(B, 1)
+    getlights(B)
+    setlight(B, 1, Dict("sat" => 128, "on" => true, "hue" => 20000, "bri" => 200))
+    setlights(B, Dict("sat" => 128, "on" => true, "hue" => 20000, "bri" => 200))
+    testlights(B, 20)
 
 ## Usage
 
@@ -27,7 +41,7 @@ If you haven't added your username to the bridge, try initializing it:
     B = PhilipsHueBridge("", "")
     initialize(B, devicetype="test developer", username="username")
 
-where "theusername" must be *at least* 10 characters long. You'll have to run to the bridge and hit the button (or perhaps you can hit the button then try to initialize within 10 seconds, I haven't tried that):
+You'll have to run to the bridge and hit the button:
 
     Trying to get the IP address of the Philips bridge...
     Trying to register test developer and yourusername to the bridge at 192.168.1.111...
@@ -54,12 +68,12 @@ To set the parameters of a light, pass a dictionary with one or more key/value p
 
 where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?), where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc. If keys are omitted, that aspect of the light won't be changed. Keys are strings, values can be numeric and will get converted to strings.
 
-    setlight(B, 1, Dict{Any,Any}("on" => false)
-    setlight(B, 1, Dict{Any,Any}("on" => true, "hue" => 10000)
-    setlights(B, Dict{Any,Any}("sat" => 255, "bri" => 255, "hue" => 20000, "on" => true))
-    setlights(B, Dict{Any,Any}("sat" => 25,  "on" => true))
+    setlight(B, 1, Dict("on" => false)
+    setlight(B, 1, Dict("on" => true, "hue" => 10000)
+    setlights(B, Dict("sat" => 255, "bri" => 255, "hue" => 20000, "on" => true))
+    setlights(B, Dict("sat" => 25,  "on" => true))
 
-Note that this syntax is specific to Julia version 0.4. For version 3, use the simple untyped dictionary syntax:
+Note that this syntax is specific to Julia version 0.4. (For version 3, you used the simpler dictionary syntax:
 
     {"bri" => rand(0:255), "hue" => rand(1:65000), "sat" => rand(1:255)}
 
