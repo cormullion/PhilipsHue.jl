@@ -2,30 +2,30 @@ VERSION >= v"0.4.0-dev+6641" && __precompile__()
 
 module PhilipsHue
 
-using JSON, Requests, Compat
+using JSON, Requests, Colors
 
 import Requests: get, post, put, delete, options, bytes, text, json
 
 export  PhilipsHueBridge, getIP, getbridgeconfig, isinitialized,
-        getlights, getlight, setlight, setlights, testlights,
-        register, initialize
+        getlights, getlight, setlight, setlights,
+        testlights, register, initialize
 
 type PhilipsHueBridge
-  ip::String
-  username:: String
-  function PhilipsHueBridge(ip, username)
-    fields = split(ip,'.')
-    if length(fields) != 4
-        throw(ArgumentError("IP address must have exactly four components."))
+    ip::String
+    username:: String
+    function PhilipsHueBridge(ip, username)
+        fields = split(ip,'.')
+        if length(fields) != 4
+            throw(ArgumentError("IP address must have exactly four components."))
+        end
+        for f in fields
+            fint = parse(Int, f)
+            if fint < 0 || fint > 255
+                throw(ArgumentError("IP address components must be between 0 and 255."))
+            end
+        end
+        new(ip, username)
     end
-    for f in fields
-       fint = parse(Int, f)
-       if fint < 0 || fint > 255
-            throw(ArgumentError("IP address components must be between 0 and 255."))
-       end
-    end
-    new(ip, username)
-  end
 end
 
 """
@@ -62,12 +62,13 @@ Return true if the bridge has been initialized, and there is a connection to the
 
     isinitialized(bridge::PhilipsHueBridge)
 """
+
 function isinitialized(bridge::PhilipsHueBridge)
-	if get(getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
-	  return true
-	else
-	  return false
-	end
+    if get(getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
+        return true
+    else
+        return false
+    end
 end
 
 """
@@ -77,15 +78,15 @@ Read the bridge's IP settings from the [meethue.com]("https://www.meethue.com/ap
 """
 
 function getIP()
-	response = get("https://www.meethue.com/api/nupnp")
+    response = get("https://www.meethue.com/api/nupnp")
     # this url sometimes redirects, we should follow...
-	if response.status == 302
-	    println("trying curl instead, in case of redirects")
+    if response.status == 302
+        println("trying curl instead, in case of redirects")
         bridgeinfo = JSON.parse(readall(`curl -sL http://www.meethue.com/api/nupnp`))
-	else
-	    bridgeinfo = JSON.parse(Requests.text(response))
-	end
-	return bridgeinfo[1]["internalipaddress"]
+    else
+        bridgeinfo = JSON.parse(Requests.text(response))
+    end
+    return bridgeinfo[1]["internalipaddress"]
 end
 
 """
@@ -120,22 +121,22 @@ Return the settings of the specified light.
 
 function getlight(bridge::PhilipsHueBridge, light=1)
     response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
- 	responsedata = JSON.parse(Requests.text(response))
+    responsedata = JSON.parse(Requests.text(response))
 
- 	println("data for light $light: $responsedata")
+    println("data for light $light: $responsedata")
 
- 	# not all Hue lights have sat/hue!
+    # not all Hue lights have sat/hue, some are the uncolored version
 
     if responsedata["type"] == "Dimmable light"
         return (
-            responsedata["state"]["on"],
-            responsedata["state"]["bri"])
+        responsedata["state"]["on"],
+        responsedata["state"]["bri"])
     elseif responsedata["type"] == "Extended color light"
         return (
-            responsedata["state"]["on"],
-            responsedata["state"]["sat"],
-            responsedata["state"]["bri"],
-            responsedata["state"]["hue"])
+        responsedata["state"]["on"],
+        responsedata["state"]["sat"],
+        responsedata["state"]["bri"],
+        responsedata["state"]["hue"])
     end
 end
 
@@ -157,15 +158,30 @@ Keys are strings, values can be numeric and will get converted to strings
 """
 
 function setlight(bridge::PhilipsHueBridge, light::Int, settings::Dict)
-  state = AbstractString[]
-  for (k, v) in settings
-     push!(state, ("\"$k\": $(string(v))"))
-  end
-  state = "{" * join(state, ",") * "}"
-  response = put("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))/state", data="$(state)")
-  return JSON.parse(Requests.text(response))
+    state = AbstractString[]
+    for (k, v) in settings
+        push!(state, ("\"$k\": $(string(v))"))
+    end
+    state = "{" * join(state, ",") * "}"
+    response = put("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))/state", data="$(state)")
+    return JSON.parse(Requests.text(response))
 end
 
+"""
+Set color of a light using Colors.jl style colors.
+
+setlight(bridge::PhilipsHueBridge, light::Int, col::ColorTypes.Colorant)
+
+   setlight(B, 1, Colors.RGB(0.75, 0.25, 0.75))
+   setlight(B, 1, colorant"Pink")
+
+"""
+
+function setlight(bridge::PhilipsHueBridge, light::Int, col::Color)
+    c = convert(Colors.HSV, col)
+    h, s, v = round(Int, (c.h / 360) * 65535), round(Int, c.s * 255), round(Int, c.v * 255)
+    setlight(bridge, light, Dict("on" => true, "sat" => s, "bri" => v, "hue" => h))
+end
 
 """
 
@@ -195,13 +211,21 @@ function setlights(bridge::PhilipsHueBridge, settings::Dict)
     return JSON.parse(Requests.text(response))
 end
 
+"""
+
+Register the devicetype and username with the bridge.
+
+    Quoth Philips: If the username is not provided, a random key will be
+        generated and returned in the response. Important! The
+        username will soon be deprecated in the bridge. It is
+        strongly recommended not to use this and use the randomly
+        generated bridge username.
+
+    So we'll return the randomly generated key, or "" on failure
+
+"""
+
 function register(bridge_ip; devicetype="juliascript", username="juliauser1")
-    # Quoth Philips: If the username is not provided, a random key will be generated and returned in the response.
-    #                Important! The username will soon be deprecated in the bridge. It is strongly recommended not to use
-    #                this and use the randomly generated bridge username.
-
-    # So we'll return the randomly generated key, or "" on failure
-
     response     = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)#$(username)\"}")
     responsedata = JSON.parse(Requests.text(response))
     # responsedata is probably:

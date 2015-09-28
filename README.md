@@ -2,7 +2,7 @@
 
 A few simple functions to control Philips Hue light bulbs from Julia.
 
-Uses JSON and Requests packages, and Compat for compatibility between version 0.3 and 0.4.
+Uses JSON, Requests, and Colors packages.
 
 ## Current status
 
@@ -12,13 +12,15 @@ Updated to work with Julia versions 0.4.
 
     B = PhilipsHueBridge("192.168.1.xx", "existingusername")
     getIP()
-    getbridgeconfig(B)
     initialize(B; devicetype="juliascript", username="juliauser1")
-    isinitialized(B)
     register("192.168.1.xx"; devicetype="juliascript", username="juliauser1")
+
+    getbridgeconfig(B)
+    isinitialized(B)
     getlight(B, 1)
     getlights(B)
     setlight(B, 1, Dict("sat" => 128, "on" => true, "hue" => 20000, "bri" => 200))
+    setlight(B, 1, colorant"Pink")
     setlights(B, Dict("sat" => 128, "on" => true, "hue" => 20000, "bri" => 200))
     testlights(B, 20)
 
@@ -73,9 +75,10 @@ where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is 
     setlights(B, Dict("sat" => 255, "bri" => 255, "hue" => 20000, "on" => true))
     setlights(B, Dict("sat" => 25,  "on" => true))
 
-Note that this syntax is specific to Julia version 0.4. (For version 3, you used the simpler dictionary syntax:
+Using the definitions and conversions in Colors.jl, you can do things like this:
 
-    {"bri" => rand(0:255), "hue" => rand(1:65000), "sat" => rand(1:255)}
+    setlight(B, 1, RGB(1, 0.3, 0.6))
+    setlight(B, 1, colorant"Pink")
 
 ### Other functions
 
@@ -131,7 +134,3 @@ For example:
     getlight(B, 2)
 
 returns (true,25,254,15000) - On, Saturation, Brightness, Hue
-
-## Problems, issues
-
-In practice, the only problem at the moment is that Julia takes a few seconds to load Requests.jl and JSON.jl... :)
