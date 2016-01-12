@@ -4,16 +4,40 @@ A few simple functions to control Philips Hue light bulbs from Julia.
 
 Uses JSON, Requests, and Colors packages.
 
-## Current status
-
-Updated to work with Julia versions 0.4.
+Works with Julia version 0.4.
 
 ## Summary
 
-    B = PhilipsHueBridge("192.168.1.xx", "existingusername")
-    getIP()
-    initialize(B; devicetype="juliascript", username="juliauser1")
-    register("192.168.1.xx"; devicetype="juliascript", username="juliauser1")
+To access and control the bridge you need to know its IP address, and register and obtain a 'username' (a string of hex) which you can use in subsequent sessions. This approach replaces the old 'username' system which Philips has already deprecated and will remove soon.
+
+The first run:
+
+    using PhilipsHue
+    B = PhilipsHueBridge("192.168.1.2")
+    initialize(B, devicetype="juliascript#user1")
+
+You'll now have to run to the bridge and hit the button:
+
+    Trying to get the IP address of the Philips bridge...
+    Trying to register ... to the bridge at 192.168...
+    Quick, you have ten seconds to press the button on the bridge!
+    successfully added to the bridge at 192.168...
+    Registration successful
+    true
+
+and the 'username' should be stored in a field of B, so `B.username` might be something like "2e4bdae26d734a73aeec4c21d4fd6". Remember it!
+
+    testlights(B)
+
+``B`` now represents your bridge, and most of the functions require this as the first argument.
+
+In a future Julia session you don't have to initialize, and can simply do:
+
+    using PhilipsHue
+    B = PhilipsHueBridge("192.168.1.2", "2e4bdae26d734a73aeec4c21d4fd6")
+    testlights(B)
+
+There's also:
 
     getbridgeconfig(B)
     isinitialized(B)
@@ -23,44 +47,13 @@ Updated to work with Julia versions 0.4.
     setlight(B, 1, colorant"Pink")
     setlights(B, Dict("sat" => 128, "on" => true, "hue" => 20000, "bri" => 200))
     testlights(B, 20)
-
-## Usage
-
-If you already know your Philips Hue bridge's IP address and existing username:
-
-    using PhilipsHue
-    B = PhilipsHueBridge("192.168.1.111", "username")
+    randomcolors(B, 1, 10)
 
 If you don't know the current IP address, try:
 
 	 getIP()
 
 which accesses your current configuration as registered at http://meethue.com.
-
-If you haven't added your username to the bridge, try initializing it:
-
-    using PhilipsHue
-    B = PhilipsHueBridge("", "")
-    initialize(B, devicetype="test developer", username="username")
-
-You'll have to run to the bridge and hit the button:
-
-    Trying to get the IP address of the Philips bridge...
-    Trying to register test developer and yourusername to the bridge at 192.168.1.111...
-    Quick, you have ten seconds to press the button on the bridge!
-    successfully added test developer and yourusername to the bridge at 192.168.1.111
-    Registration successful
-    true
-
-``B`` now represents your bridge, and most of the functions require this as the first argument.
-
-Philips are in the process of deprecating usernames, by the way.
-
-To test:
-
-    testlights(B)
-
-does a few quick flashes.
 
 ## Setting light parameters
 
@@ -70,8 +63,8 @@ To set the parameters of a light, pass a dictionary with one or more key/value p
 
 where "sat" and "bri" are saturation and brightness from 0 to 255, and "hue" is from 0 to 65280 (?), where 0 is red, yellow is 12750, green is 25500, blue is 46920, etc. If keys are omitted, that aspect of the light won't be changed. Keys are strings, values can be numeric and will get converted to strings.
 
-    setlight(B, 1, Dict("on" => false)
-    setlight(B, 1, Dict("on" => true, "hue" => 10000)
+    setlight(B, 1, Dict("on" => false))
+    setlight(B, 1, Dict("on" => true, "hue" => 10000))
     setlights(B, Dict("sat" => 255, "bri" => 255, "hue" => 20000, "on" => true))
     setlights(B, Dict("sat" => 25,  "on" => true))
 
@@ -96,7 +89,7 @@ which returns a dictionary with keys such as "timezone", "apiversion", "paddles"
 
 returns
 
-    "1.3.0"
+    "1.11.0"
 
 A list of current approved apps and users is stored in the whitelist:
 
@@ -114,7 +107,7 @@ A list of current approved apps and users is stored in the whitelist:
 
 Get information for all lights:
 
-	   getlights(B)
+	getlights(B)
 
 For example:
 
