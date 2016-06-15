@@ -7,7 +7,7 @@ using JSON, Requests, Colors
 import Requests: get, post, put, delete, options, bytes, text, json
 
 export  PhilipsHueBridge, getIP, getbridgeconfig, isinitialized,
-getlights, getlight, setlight, setlights, randomcolors,
+getlights, getlight, getlightnumbers, setlight, setlights, randomcolors,
 testlights, register, initialize
 
 type PhilipsHueBridge
@@ -122,11 +122,24 @@ function getbridgeconfig(bridge::PhilipsHueBridge)
     return JSON.parse(Requests.text(response))
 end
 
+"""
+Return the numebrs of lights connected to the bridge.
+
+  getlightnumbers(bridge::PhilipsHueBridge)
+
+  Returns eg:
+
+  [1, 3, 5, 6]
+"""
+
+function getlightnumbers(bridge::PhilipsHueBridge)
+  return map(x -> parse(Int, x), collect(keys(getlights(bridge))))
+end
 
 """
 Return the current setting of all lights connected to the bridge.
 
-getlights(bridge::PhilipsHueBridge)
+  getlights(bridge::PhilipsHueBridge)
 """
 
 function getlights(bridge::PhilipsHueBridge)
@@ -135,29 +148,33 @@ function getlights(bridge::PhilipsHueBridge)
 end
 
 """
-Return the settings of the specified light.
+Return the settings of the specified light. Note that if you have four lights, they're not
+necessarily going to be numbered 1, 2, 3, 4.
 
-getlight(bridge::PhilipsHueBridge, light=1)
+    getlight(bridge::PhilipsHueBridge, light=1)
+
+Returns tuple of either (on, brightness) or (on, saturation, brightness, hue)
+
 """
 
-function getlight(bridge::PhilipsHueBridge, light=1)
+function getlight(bridge::PhilipsHueBridge, light)
+    if ! in(light, getlightnumbers(bridge))
+      return("no light with number $(light). Try using getlightnumbers().")
+    end
     response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
     responsedata = JSON.parse(Requests.text(response))
 
-    # println("data for light $light: $responsedata")
-
-    # not all Hue lights have sat/hue, some are the uncolored version
-
+    # not all Hue lights have sat/hue, some are the uncolored just dimmable version
     if responsedata["type"] == "Dimmable light"
         return (
-        responsedata["state"]["on"],
-        responsedata["state"]["bri"])
+          responsedata["state"]["on"],
+          responsedata["state"]["bri"])
     elseif responsedata["type"] == "Extended color light"
         return (
-        responsedata["state"]["on"],
-        responsedata["state"]["sat"],
-        responsedata["state"]["bri"],
-        responsedata["state"]["hue"])
+          responsedata["state"]["on"],
+          responsedata["state"]["sat"],
+          responsedata["state"]["bri"],
+          responsedata["state"]["hue"])
     end
 end
 
@@ -179,6 +196,9 @@ setlight(B, 2, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)
 """
 
 function setlight(bridge::PhilipsHueBridge, light::Int, settings::Dict)
+    if ! in(light, getlightnumbers(bridge))
+      return("no light with number $(light). Try using getlightnumbers().")
+    end
     state = AbstractString[]
     for (k, v) in settings
         push!(state, ("\"$k\": $(string(v))"))
@@ -199,6 +219,9 @@ setlight(B, 1, colorant"Pink")
 """
 
 function setlight(bridge::PhilipsHueBridge, light::Int, col::Color)
+    if ! in(light, getlightnumbers(bridge))
+      return("no light with number $(light). Try using getlightnumbers().")
+    end
     c = convert(Colors.HSV, col)
     h, s, v = round(Int, (c.h / 360) * 65535), round(Int, c.s * 255), round(Int, c.v * 255)
     setlight(bridge, light, Dict("on" => true, "sat" => s, "bri" => v, "hue" => h))

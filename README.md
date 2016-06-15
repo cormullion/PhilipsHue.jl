@@ -10,32 +10,38 @@ Works with Julia version 0.4.
 
 To access and control the bridge you need to know its IP address, and register and obtain a 'username' (a string of hex) which you can use in subsequent sessions. This approach replaces the old 'username' system which Philips has already deprecated and will remove soon.
 
-The first run:
+For the very first run:
 
     using PhilipsHue
     B = PhilipsHueBridge("192.168.1.2")
     initialize(B, devicetype="juliascript#user1")
 
-You'll now have to run to the bridge and hit the button:
+You'll now have to run to the Hue bridge and hit the button:
 
-    Trying to get the IP address of the Philips bridge...
-    Trying to register ... to the bridge at 192.168...
-    Quick, you have ten seconds to press the button on the bridge!
-    successfully added to the bridge at 192.168...
-    Registration successful
+    julia> initialize(B, devicetype="juliascript#user1")
+    initialize(): Trying to get the IP address of the Philips bridge.
+    initialize(): Found bridge at 192.168.1.2.
+    initialize(): Trying to register juliascript#user1 with the bridge at 192.168.1.2...
+    register(): Quick, you have ten seconds to press the button on the bridge!
+    register(): Successfully registered juliascript#user1 with the bridge at 192.168.1.2
+    register(): username is KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJN
+    initialize(): Registration successful
+    your username is KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJN
     true
 
-and the 'username' should be stored in a field of B, so `B.username` might be something like "2e4bdae26d734a73aeec4c21d4fd6". Remember it!
+and the 'username' should also be stored in a field of B. Remember it!
 
     testlights(B)
 
 ``B`` now represents your bridge, and most of the functions require this as the first argument.
 
-In a future Julia session you don't have to initialize, and can simply do:
+In a subsequent Julia session you don't have to do this initialization, and can simply do:
 
     using PhilipsHue
-    B = PhilipsHueBridge("192.168.1.2", "2e4bdae26d734a73aeec4c21d4fd6")
+    B = PhilipsHueBridge("192.168.1.2", "KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJN")
     testlights(B)
+
+since you remembered that 'username'.
 
 There's also:
 
@@ -48,12 +54,13 @@ There's also:
     setlights(B, Dict("sat" => 128, "on" => true, "hue" => 20000, "bri" => 200))
     testlights(B, 20)
     randomcolors(B, 1, 10)
+    getlightnumbers(B)
 
-If you don't know the current IP address, try:
+If you don't know the current IP address of the bridge, try:
 
 	 getIP()
 
-which accesses your current configuration as registered at http://meethue.com.
+which tries to access your current configuration as registered at http://meethue.com.
 
 ## Setting light parameters
 
@@ -73,7 +80,24 @@ Using the definitions and conversions in Colors.jl, you can do things like this:
     setlight(B, 1, RGB(1, 0.3, 0.6))
     setlight(B, 1, colorant"Pink")
 
-### Other functions
+Note that light numbers are not necessarily consecutive, or numbered from 1. For example, if you have four lights, their
+numbers might be `[1, 3, 6, 9]`. You can use `getlightnumbers()` to get the numbers of lights connected to the bridge:
+
+    getlightnumbers(bridge::PhilipsHueBridge)
+
+which returns eg:
+
+    [1, 3, 5, 6]
+
+Get information for a specific light:
+
+    getlight(B, 2)
+
+For example:
+
+    getlight(B, 2)
+
+returns (true,25,254,15000) - On, Saturation, Brightness, Hue
 
 Get the bridge's current registered IP address (which can usually be read from `http://meethue.com` using `get("https://www.meethue.com/api/nupnp")`):
 
@@ -89,7 +113,7 @@ which returns a dictionary with keys such as "timezone", "apiversion", "paddles"
 
 returns
 
-    "1.11.0"
+    "1.13.0"
 
 A list of current approved apps and users is stored in the whitelist:
 
@@ -107,7 +131,7 @@ A list of current approved apps and users is stored in the whitelist:
 
 Get information for all lights:
 
-	getlights(B)
+	 getlights(B)
 
 For example:
 
@@ -117,13 +141,3 @@ For example:
       "1" => ["name"=>"Hue Lamp","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none",…
       "2" => ["name"=>"Hue Lamp 1","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
       "3" => ["name"=>"Hue Lamp 2","swversion"=>"66010820","pointsymbol"=>["8"=>"none","4"=>"none","1"=>"none","5"=>"none…
-
-Get information for a specific light:
-
-    getlight(B, 2)
-
-For example:
-
-    getlight(B, 2)
-
-returns (true,25,254,15000) - On, Saturation, Brightness, Hue
