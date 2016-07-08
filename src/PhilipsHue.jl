@@ -11,21 +11,21 @@ getlights, getlight, getlightnumbers, setlight, setlights, randomcolors,
 testlights, register, initialize
 
 type PhilipsHueBridge
-    ip::AbstractString
-    username:: AbstractString
-    function PhilipsHueBridge(ip, username = "")
-        fields = split(ip,'.')
-        if length(fields) != 4
-            throw(ArgumentError("IP address must have exactly four components."))
-        end
-        for f in fields
-            fint = parse(Int, f)
-            if fint < 0 || fint > 255
-                throw(ArgumentError("IP address components must be between 0 and 255."))
-            end
-        end
-        new(ip, username)
+  ip::AbstractString
+  username:: AbstractString
+  function PhilipsHueBridge(ip, username = "")
+    fields = split(ip,'.')
+    if length(fields) != 4
+      throw(ArgumentError("IP address must have exactly four components."))
     end
+    for f in fields
+      fint = parse(Int, f)
+      if fint < 0 || fint > 255
+        throw(ArgumentError("IP address components must be between 0 and 255."))
+      end
+    end
+    new(ip, username)
+  end
 end
 
 """
@@ -40,96 +40,96 @@ Returns true or false.
 
 For example:
 
-B = PhilipsHueBridge("192.168.1.2")
-initialize(bridge::PhilipsHueBridge; devicetype="juliascript#user1")
-testlights(B)
+    B = PhilipsHueBridge("192.168.1.2")
+    initialize(bridge::PhilipsHueBridge; devicetype="juliascript#user1")
+    testlights(B)
 
-# B.username is something like "2e4bdae26d734a73aeec4c21d4fd6"
+    # B.username is something like "2e4bdae26d734a73aeec4c21d4fd6"
 
 then in a future Julia session you can do:
 
-B = PhilipsHueBridge("192.168.1.2", "2e4bdae26d734a73aeec4c21d4fd6")
-testlights(B)
+    B = PhilipsHueBridge("192.168.1.2", "2e4bdae26d734a73aeec4c21d4fd6")
+    testlights(B)
 
 """
 
 function initialize(bridge::PhilipsHueBridge; devicetype="juliascript#user1")
-    println("initialize(): Trying to get the IP address of the Philips bridge.")
-    ipaddress = "192.168.1.2"
-    try
-        ipaddress = getIP()
-    catch e
-        println("error was $e")
-        return false
-    end
-    bridge.ip = ipaddress
-    println("initialize(): Found bridge at $(bridge.ip).")
-    println("initialize(): Trying to register $devicetype with the bridge at $(bridge.ip)...")
-    username = register(bridge.ip, devicetype=devicetype)
-    if ! isempty(username)
-        println("initialize(): Registration successful")
-        # save username in bridge
-        bridge.username = username
-        println("your username is $username")
-        return true
-    else
-        warn("initialize(): Registration failed")
-        return false
-    end
+  println("initialize(): Trying to get the IP address of the Philips bridge.")
+  ipaddress = "192.168.1.2"
+  try
+    ipaddress = getIP()
+  catch e
+    println("error was $e")
+    return false
+  end
+  bridge.ip = ipaddress
+  println("initialize(): Found bridge at $(bridge.ip).")
+  println("initialize(): Trying to register $devicetype with the bridge at $(bridge.ip)...")
+  username = register(bridge.ip, devicetype=devicetype)
+  if ! isempty(username)
+    println("initialize(): Registration successful")
+    # save username in bridge
+    bridge.username = username
+    println("your username is $username")
+    return true
+  else
+    warn("initialize(): Registration failed")
+    return false
+  end
 end
 
 """
 Return true if the bridge has been initialized, and there is a connection to the portal.
 
-isinitialized(bridge::PhilipsHueBridge)
+    isinitialized(bridge::PhilipsHueBridge)
 """
 
 function isinitialized(bridge::PhilipsHueBridge)
-    if get(getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
-        return true
-    else
-        return false
-    end
+  if get(getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
+    return true
+  else
+    return false
+  end
 end
 
 """
 Read the bridge's IP settings from the [meethue.com]("https://www.meethue.com/api/nupnp") website.
 
-getIP()
+    getIP()
 """
 
 function getIP()
-    response = get("https://www.meethue.com/api/nupnp")
-    # this url sometimes redirects, we should follow...
-    if response.status == 302
-        println("trying curl instead, in case of redirects")
-        bridgeinfo = JSON.parse(readall(`curl -sL http://www.meethue.com/api/nupnp`))
-    else
-        bridgeinfo = JSON.parse(Requests.text(response))
-    end
-    return bridgeinfo[1]["internalipaddress"]
+  response = get("https://www.meethue.com/api/nupnp")
+  # this url sometimes redirects, we should follow...
+  if response.status == 302
+    println("trying curl instead, in case of redirects")
+    bridgeinfo = JSON.parse(readall(`curl -sL http://www.meethue.com/api/nupnp`))
+  else
+    bridgeinfo = JSON.parse(Requests.text(response))
+  end
+  return bridgeinfo[1]["internalipaddress"]
 end
 
 """
 Read the current bridge configuration. For example:
 
-B = PhilipsHueBridge("192.168.1.90", "username")
-getbridgeconfig(B)
+    B = PhilipsHueBridge("192.168.1.90", "username")
+    getbridgeconfig(B)
 """
 
 function getbridgeconfig(bridge::PhilipsHueBridge)
-    response = get("http://$(bridge.ip)/api/$(bridge.username)/config")
-    return JSON.parse(Requests.text(response))
+  response = get("http://$(bridge.ip)/api/$(bridge.username)/config")
+  return JSON.parse(Requests.text(response))
 end
 
 """
-Return the numebrs of lights connected to the bridge.
+Return the numbers of lights connected to the bridge.
 
-  getlightnumbers(bridge::PhilipsHueBridge)
+    getlightnumbers(bridge::PhilipsHueBridge)
 
-  Returns eg:
+Returns eg:
 
-  [1, 3, 5, 6]
+    [1, 3, 5, 6]
 """
 
 function getlightnumbers(bridge::PhilipsHueBridge)
@@ -137,14 +137,14 @@ function getlightnumbers(bridge::PhilipsHueBridge)
 end
 
 """
-Return the current setting of all lights connected to the bridge.
+Return the current settings of all lights connected to the bridge.
 
-  getlights(bridge::PhilipsHueBridge)
+    getlights(bridge::PhilipsHueBridge)
 """
 
 function getlights(bridge::PhilipsHueBridge)
-    response = get("http://$(bridge.ip)/api/$(bridge.username)/lights")
-    return JSON.parse(Requests.text(response))
+  response = get("http://$(bridge.ip)/api/$(bridge.username)/lights")
+  return JSON.parse(Requests.text(response))
 end
 
 """
@@ -153,29 +153,16 @@ necessarily going to be numbered 1, 2, 3, 4.
 
     getlight(bridge::PhilipsHueBridge, light=1)
 
-Returns tuple of either (on, brightness) or (on, saturation, brightness, hue)
+Returns response.
 
 """
 
 function getlight(bridge::PhilipsHueBridge, light)
-    if ! in(light, getlightnumbers(bridge))
-      return("no light with number $(light). Try using getlightnumbers().")
-    end
-    response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
-    responsedata = JSON.parse(Requests.text(response))
-
-    # not all Hue lights have sat/hue, some are the uncolored just dimmable version
-    if responsedata["type"] == "Dimmable light"
-        return (
-          responsedata["state"]["on"],
-          responsedata["state"]["bri"])
-    elseif responsedata["type"] == "Extended color light"
-        return (
-          responsedata["state"]["on"],
-          responsedata["state"]["sat"],
-          responsedata["state"]["bri"],
-          responsedata["state"]["hue"])
-    end
+  if ! in(light, getlightnumbers(bridge))
+    return("no light with number $(light). Try using getlightnumbers().")
+  end
+  response = get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
+  return JSON.parse(Requests.text(response))
 end
 
 """
@@ -189,42 +176,41 @@ If keys are omitted, that aspect of the light won't be changed.
 
 Keys are AbstractStrings, values can be numeric and will get converted to AbstractStrings
 
-setlight(B, 1, Dict("on" => true))
-setlight(B, 3, Dict("on" => false))
-setlight(B, 2, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)
+    setlight(B, 1, Dict("on" => true))
+    setlight(B, 3, Dict("on" => false))
+    setlight(B, 2, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)
 
 """
 
 function setlight(bridge::PhilipsHueBridge, light::Int, settings::Dict)
-    if ! in(light, getlightnumbers(bridge))
-      return("no light with number $(light). Try using getlightnumbers().")
-    end
-    state = AbstractString[]
-    for (k, v) in settings
-        push!(state, ("\"$k\": $(string(v))"))
-    end
-    state = "{" * join(state, ",") * "}"
-    response = put("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))/state", data="$(state)")
-    return JSON.parse(Requests.text(response))
+  if ! in(light, getlightnumbers(bridge))
+    return("no light with number $(light). Try using getlightnumbers().")
+  end
+  state = AbstractString[]
+  for (k, v) in settings
+    push!(state, ("\"$k\": $(string(v))"))
+  end
+  state = "{" * join(state, ",") * "}"
+  response = put("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))/state", data="$(state)")
+  return JSON.parse(Requests.text(response))
 end
 
 """
 Set color of a light using Colors.jl style colors.
 
-setlight(bridge::PhilipsHueBridge, light::Int, col::ColorTypes.Colorant)
-
-setlight(B, 1, Colors.RGB(0.75, 0.25, 0.75))
-setlight(B, 1, colorant"Pink")
+    setlight(bridge::PhilipsHueBridge, light::Int, col::ColorTypes.Colorant)
+    setlight(B, 1, Colors.RGB(0.75, 0.25, 0.75))
+    setlight(B, 1, colorant"Pink")
 
 """
 
 function setlight(bridge::PhilipsHueBridge, light::Int, col::Color)
-    if ! in(light, getlightnumbers(bridge))
-      return("no light with number $(light). Try using getlightnumbers().")
-    end
-    c = convert(Colors.HSV, col)
-    h, s, v = round(Int, (c.h / 360) * 65535), round(Int, c.s * 255), round(Int, c.v * 255)
-    setlight(bridge, light, Dict("on" => true, "sat" => s, "bri" => v, "hue" => h))
+  if ! in(light, getlightnumbers(bridge))
+    return("no light with number $(light). Try using getlightnumbers().")
+  end
+  c = convert(Colors.HSV, col)
+  h, s, v = round(Int, (c.h / 360) * 65535), round(Int, c.s * 255), round(Int, c.v * 255)
+  setlight(bridge, light, Dict("on" => true, "sat" => s, "bri" => v, "hue" => h))
 end
 
 """
@@ -239,20 +225,20 @@ If keys are omitted, that aspect of the light won't be changed.
 
 Keys are AbstractStrings, values can be numeric and will get converted to AbstractStrings
 
-setlights(B, Dict("on" => true))
-setlights(B, Dict("on" => false))
-setlights(B, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)
+    setlights(B, Dict("on" => true))
+    setlights(B, Dict("on" => false))
+    setlights(B, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)
 
 """
 
 function setlights(bridge::PhilipsHueBridge, settings::Dict)
-    state = AbstractString[]
-    for (k, v) in settings
-        push!(state,("\"$k\": $(string(v))"))
-    end
-    state = "{" * join(state, ",") * "}"
-    response = put("http://$(bridge.ip)/api/$(bridge.username)/groups/0/action", data="$(state)")
-    return JSON.parse(Requests.text(response))
+  state = AbstractString[]
+  for (k, v) in settings
+    push!(state,("\"$k\": $(string(v))"))
+  end
+  state = "{" * join(state, ",") * "}"
+  response = put("http://$(bridge.ip)/api/$(bridge.username)/groups/0/action", data="$(state)")
+  return JSON.parse(Requests.text(response))
 end
 
 """
@@ -265,71 +251,76 @@ username will soon be deprecated in the bridge. It is
 strongly recommended not to use this and use the randomly
 generated bridge username.
 
-So we'll return the randomly generated key, or "" on failure
+So we'll return the randomly generated key, or "" on failure.
 
 """
 
 function register(bridge_ip; devicetype="juliascript", blankusername="")
-    response     = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
+  response     = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
+  responsedata = JSON.parse(Requests.text(response))
+  # responsedata is probably:
+  # 1-element Array{Any,1}:
+  # ["error"=>["type"=>101,"description"=>"link button not pressed","address"=>"/"]]
+  if responsedata[1][first(keys(responsedata[1]))]["description"] == "link button not pressed"
+    println("register(): Quick, you have ten seconds to press the button on the bridge!")
+    sleep(10)
+    response = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
     responsedata = JSON.parse(Requests.text(response))
-    # responsedata is probably:
-    # 1-element Array{Any,1}:
-    # ["error"=>["type"=>101,"description"=>"link button not pressed","address"=>"/"]]
-    if responsedata[1][first(keys(responsedata[1]))]["description"] == "link button not pressed"
-        println("register(): Quick, you have ten seconds to press the button on the bridge!")
-        sleep(10)
-        response = post("http://$(bridge_ip)/api/"; data="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
-        responsedata = JSON.parse(Requests.text(response))
-        if first(keys(responsedata[1])) == "success"
-            println("register(): Successfully registered $devicetype with the bridge at $bridge_ip")
-            # returns username which is randomly generated key
-            username = responsedata[1]["success"]["username"]
-            println("register(): username is $username")
-            return username
-        else
-            warn("register(): Failed to register $devicetype#$blankusername with the bridge at $bridge_ip")
-            return ""
-        end
+    if first(keys(responsedata[1])) == "success"
+      println("register(): Successfully registered $devicetype with the bridge at $bridge_ip")
+      # returns username which is randomly generated key
+      username = responsedata[1]["success"]["username"]
+      println("register(): username is $username")
+      return username
+    else
+      warn("register(): Failed to register $devicetype#$blankusername with the bridge at $bridge_ip")
+      return ""
     end
+  end
 end
 
 """
 Test all lights.
 
-testlights(bridge::PhilipsHueBridge, total=5)
+    testlights(bridge::PhilipsHueBridge, total=5)
 
 Since not all Hue lights do color, not testing color here.
 """
 
 function testlights(bridge::PhilipsHueBridge, total=5)
-    setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
-    for i in 1:total
-        setlights(bridge, Dict("on" => false))
-        sleep(1)
-        setlights(bridge, Dict("on" => true))
-        sleep(1)
-    end
+  setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
+  for i in 1:total
+    setlights(bridge, Dict("on" => false))
+    sleep(1)
+    setlights(bridge, Dict("on" => true))
+    sleep(1)
+  end
+  for light in enumerate(getlights(bridge))
+    setlight(bridge, light[1], Dict("on"=>false))
+    sleep(1)
+    setlight(bridge, light[1], Dict("on"=> true))
+    sleep(1)
+  end
+  setlights(bridge, Dict("hue" => 10000, "sat" => 0, "bri" => 254))
+end
+
+"""
+  Do random colors for all lights.
+
+  randomcolors(bridge::PhilipsHueBridge, delay = 1, repetitions=10; showstatus=false)
+
+"""
+
+function randomcolors(bridge::PhilipsHueBridge, delay = 1, repetitions=10; showstatus=false)
+  setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
+  for r in 1:repetitions
     for light in enumerate(getlights(bridge))
-        setlight(bridge, light[1], Dict("on"=>false))
-        sleep(1)
-        setlight(bridge, light[1], Dict("on"=> true))
-        sleep(1)
+      response = getlight(bridge, light[1])
+      if length(response) != 2 # don't do this with white only bulbs
+        setlight(bridge, light[1], Dict("on" => true, "sat" => rand(128:254), "hue" => rand(0:65200)))
+      end
+      sleep(delay)
     end
-    setlights(bridge, Dict("hue" => 10000, "sat" => 0, "bri" => 254))
+  end
+  response = setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
 end
-
-function randomcolors(bridge::PhilipsHueBridge, delay = 1, repetitions=10)
-    setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
-    for r in 1:repetitions
-        for light in enumerate(getlights(bridge))
-            response = getlight(bridge, light[1])
-            if length(response) != 2 # don't do this with white only bulbs
-                setlight(bridge, light[1], Dict("on" => true, "sat" => rand(128:254), "hue" => rand(0:65200)))
-            end
-            sleep(delay)
-        end
-    end
-    setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
-end
-
-end # module
