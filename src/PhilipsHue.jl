@@ -196,7 +196,7 @@ function setlight(bridge::PhilipsHueBridge, light::Int, settings::Dict)
 end
 
 """
-Set color of a light using Colors.jl style colors.
+Set color of a light using Colors.jl style colors. (You might need `using Colors`.)
 
     setlight(bridge::PhilipsHueBridge, light::Int, col::ColorTypes.Colorant)
     setlight(B, 1, Colors.RGB(0.75, 0.25, 0.75))
@@ -323,4 +323,6 @@ function randomcolors(bridge::PhilipsHueBridge, delay = 1, repetitions=10; shows
     end
   end
   response = setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
+end
+
 end

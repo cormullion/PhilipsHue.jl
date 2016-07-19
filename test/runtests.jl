@@ -4,23 +4,23 @@ println("loaded PhilipsHue")
 
 # these will have to be set to valid values before you run the test
 
-B = PhilipsHueBridge("192.168.1.2"      , "KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJNruVB")
+B = PhilipsHueBridge("192.168.1.3"      , "KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJNruVB")
 
 lightnumbers = getlightnumbers(B)
 
 firstlight = first(lightnumbers)
 
-println("Bridge config: \t"             , getbridgeconfig(B))
-println("Bridge IP: \t"                 , getIP())
-println("Bridge initialized?: \t"       , isinitialized(B))
-println("Light config: \t"              , getlights(B))
-println("Get light config: \t"          , getlight(B, firstlight))
-println("Get light config: \t"          , getlight(B, 4))
+println("Bridge config: \n\t"             , getbridgeconfig(B))
+println("Bridge IP: \n\t"                 , getIP())
+println("Bridge initialized?: \n\t"       , isinitialized(B))
+println("Light config: \n\t"              , getlights(B))
+println("Get light config: \n\t"          , getlight(B, firstlight))
+println("Get light config: \n\t"          , getlight(B, 4))
 
 
-println("Set light 1 on: \t"            , setlight(B, firstlight, Dict("on" => true)))
-println("Set light 1 off: \t"           , setlight(B, firstlight, Dict("on" => false)))
-println("Set light 1 \t"                , setlight(B, firstlight, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)))
+println("Set first light on: \n\t"        , setlight(B, firstlight, Dict("on" => true)))
+println("Set first light off: \n\t"       , setlight(B, firstlight, Dict("on" => false)))
+println("Set first light  \n\t"          , setlight(B, firstlight, Dict("on" => true, "sat" => 123, "bri" => 243, "hue" => 123)))
 
 # random all lights
 for i in 0:20
@@ -28,13 +28,13 @@ for i in 0:20
     sleep(0.5)
 end
 
-# one light, set RGB color
+# for a random light, set RGB color
 
 for r in 0:0.25:1
     for g in 0:0.25:1
         for b in 0:0.25:1
            setlight(B, lightnumbers[rand(1:end)], Colors.RGB(r, g, g))
-           sleep(1)
+           sleep(.25)
        end
     end
 end
