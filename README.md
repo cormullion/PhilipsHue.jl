@@ -4,7 +4,7 @@ A few simple functions to control Philips Hue light bulbs from Julia.
 
 Uses JSON, Requests, and Colors packages.
 
-Works with Julia version 0.4.
+Works with Julia version 0.5.
 
 ## Summary
 
@@ -97,7 +97,7 @@ For example:
 
     getlight(B, 2)
 
-returns (true,25,254,15000) - On, Saturation, Brightness, Hue
+returns `(true,25,254,15000)` - On, Saturation, Brightness, Hue
 
 Get the bridge's current registered IP address (which can usually be read from `http://meethue.com` using `get("https://www.meethue.com/api/nupnp")`):
 

@@ -196,7 +196,7 @@ function setlight(bridge::PhilipsHueBridge, light::Int, settings::Dict)
 end
 
 """
-Set color of a light using Colors.jl style colors.
+Set color of a light using Colors.jl style colors. (You might need `using Colors`.)
 
     setlight(bridge::PhilipsHueBridge, light::Int, col::ColorTypes.Colorant)
     setlight(B, 1, Colors.RGB(0.75, 0.25, 0.75))
