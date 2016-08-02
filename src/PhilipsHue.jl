@@ -324,3 +324,5 @@ function randomcolors(bridge::PhilipsHueBridge, delay = 1, repetitions=10; shows
   end
   response = setlights(bridge, Dict("on" => true, "hue" => 10000, "sat" => 0, "bri" => 254))
 end
+
+end
