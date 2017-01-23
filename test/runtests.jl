@@ -30,13 +30,10 @@ end
 
 # for a random light, set RGB color
 
-for r in 0:0.25:1
-    for g in 0:0.25:1
-        for b in 0:0.25:1
-           setlight(B, lightnumbers[rand(1:end)], Colors.RGB(r, g, g))
-           sleep(.25)
-       end
-    end
+# THanks, @ScottPJones!
+for r in 0:0.25:1, g in 0:0.25:1, b in 0:0.25:1
+    setlight(B, lightnumbers[rand(1:end)], Colors.RGB(r, g, b))
+    sleep(.25)
 end
 
 setlights(B, Dict("bri" => 255))

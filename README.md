@@ -43,7 +43,7 @@ In a subsequent Julia session you don't have to do this initialization, and can 
 
 since you remembered that 'username'.
 
-There's also:
+You can now try:
 
     getbridgeconfig(B)
     isinitialized(B)
@@ -89,11 +89,7 @@ which returns eg:
 
     [1, 3, 5, 6]
 
-Get information for a specific light:
-
-    getlight(B, 2)
-
-For example:
+Get information for a specific light. For example:
 
     getlight(B, 2)
 
