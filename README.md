@@ -45,7 +45,7 @@ since you remembered that 'username'.
 
 You can now try:
 
-    getbridgeconfig(B)
+    getbridgeinfo(B)
     isinitialized(B)
     getlight(B, 1)
     getlights(B)
@@ -105,7 +105,7 @@ Get the current bridge configuration:
 
 which returns a dictionary with keys such as "timezone", "apiversion", "paddles", "whitelist", and so on. You can obtain specific values:
 
-    getbridgeconfig(B)["apiversion"]
+    getbridgeinfo(B)["apiversion"]
 
 returns
 
@@ -113,7 +113,7 @@ returns
 
 A list of current approved apps and users is stored in the whitelist:
 
-    getbridgeconfig(B)["whitelist"]
+    getbridgeinfo(B, "config")["whitelist"]
     Dict{AbstractString,Any} with 25 entries:
       "lSsXQfrm7rC32SQ0"                 => Dict{AbstractString,Any}("name"=>"fred’s iPhone","last use date"=>"2015-08-27T10:32:24","create date"=>"2013-12-31T14:05:05")
       "352f5a4637d93da7121471aa39dc2db"  => Dict{AbstractString,Any}("name"=>"Harmony","last use date"=>"2014-10-13T04:56:30","create date"=>"2014-09-06T12:15:28")

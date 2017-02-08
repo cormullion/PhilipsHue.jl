@@ -145,7 +145,7 @@ Get some information from the bridge. Category can be one of:
 - "sensors" which contains all the sensors
 - "rules" which contains all the rules
 """
-function getbridgeinfo(bridge::PhilipsHueBridge, category::String)
+function getbridgeinfo(bridge::PhilipsHueBridge, category::String="config")
     categories = ["lights", "groups", "config", "schedules", "scenes", "sensors", "rules"]
     if category in categories
         response = get("http://$(bridge.ip)/api/$(bridge.username)/$category")
