@@ -133,7 +133,7 @@ getbridgeconfig(bridge::PhilipsHueBridge) = getbridgeinfo(bridge, "config")
 # end
 
 """
-    getbridgeinfo(bridge, category::String)
+    getbridgeinfo(bridge[, category::String])
 
 Get some information from the bridge. Category can be one of:
     
@@ -144,6 +144,8 @@ Get some information from the bridge. Category can be one of:
 - "scenes" which contains all the scenes
 - "sensors" which contains all the sensors
 - "rules" which contains all the rules
+
+Default is "config".
 """
 function getbridgeinfo(bridge::PhilipsHueBridge, category::String="config")
     categories = ["lights", "groups", "config", "schedules", "scenes", "sensors", "rules"]
