@@ -2,9 +2,9 @@
 
 A few simple functions to control Philips Hue light bulbs from Julia.
 
-Uses JSON, Requests, and Colors packages.
+Uses JSON, HTTP, and Colors packages.
 
-Works with Julia version 0.5.
+Works with Julia version 0.6.
 
 ## Summary
 
