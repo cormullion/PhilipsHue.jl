@@ -282,8 +282,8 @@ function register(bridge_ip; devicetype="juliascript", blankusername="")
     if responsedata[1][first(keys(responsedata[1]))]["description"] == "link button not pressed"
         println("register(): Quick, you have ten seconds to press the button on the bridge!")
         sleep(10)
-        response = post("http://$(bridge_ip)/api/"; body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
-        responsedata = JSON.parse(Requests.text(response))
+        response = HTTP.post("http://$(bridge_ip)/api/"; body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
+        responsedata = JSON.parse(String(response))
         if first(keys(responsedata[1])) == "success"
             println("register(): Successfully registered $devicetype with the bridge at $bridge_ip")
             # returns username which is randomly generated key

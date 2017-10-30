@@ -10,6 +10,8 @@ Works with Julia version 0.6.
 
 To access and control the bridge you need to know its IP address, and register and obtain a 'username' (a string of hex) which you can use in subsequent sessions. This approach replaces the old 'username' system which Philips has already deprecated and will remove soon.
 
+### If you haven't used your PhilipsHue bridge before
+
 For the very first run:
 
     using PhilipsHue
@@ -35,7 +37,9 @@ and the 'username' should also be stored in a field of B. Remember it!
 
 ``B`` now represents your bridge, and most of the functions require this as the first argument.
 
-In a subsequent Julia session you don't have to do this initialization, and can simply do:
+### Once you know your username
+
+In a subsequent Julia session, or if you already know your username, you don't have to do this initialization, and can simply do:
 
     using PhilipsHue
     B = PhilipsHueBridge("192.168.1.2", "KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJN")
