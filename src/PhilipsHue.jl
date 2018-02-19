@@ -110,7 +110,7 @@ function getIP()
     # this url sometimes redirects, we should follow...
     if response.status == 302
         println("trying curl instead, in case of redirects")
-        bridgeinfo = JSON.parse(readall(`curl -sL http://www.meethue.com/api/nupnp`))
+        bridgeinfo = JSON.parse(readstring(`curl -sL http://www.meethue.com/api/nupnp`))
     else
         bridgeinfo = JSON.parse(String(response))
     end
@@ -143,8 +143,8 @@ Default is "config".
 function getbridgeinfo(bridge::PhilipsHueBridge, category::String="config")
     categories = ["lights", "groups", "config", "schedules", "scenes", "sensors", "rules"]
     if category in categories
-        response = HTTP.get("http://$(bridge.ip)/api/$(bridge.username)/$category")
-        return JSON.parse(String(response))
+        response = HTTP.request("GET", "http://$(bridge.ip)/api/$(bridge.username)/$category")
+        return JSON.parse(String(response.body))
     else
         error("category must be one of $categories")
     end
@@ -169,8 +169,8 @@ end
 Return the current settings of all lights connected to the bridge.
 """
 function getlights(bridge::PhilipsHueBridge)
-    response = HTTP.get("http://$(bridge.ip)/api/$(bridge.username)/lights")
-    return JSON.parse(String(response))
+    response = HTTP.request("GET", "http://$(bridge.ip)/api/$(bridge.username)/lights")
+    return JSON.parse(String(response.body))
 end
 
 """
@@ -186,8 +186,8 @@ function getlight(bridge::PhilipsHueBridge, light)
     if ! in(light, getlightnumbers(bridge))
         return("no light with number $(light). Try using getlightnumbers().")
     end
-    response = HTTP.get("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
-    return JSON.parse(String(response))
+    response = HTTP.request("GET", "http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))")
+    return JSON.parse(String(response.body))
 end
 
 """
@@ -214,8 +214,8 @@ function setlight(bridge::PhilipsHueBridge, light::Int, settings::Dict)
         push!(state, ("\"$k\": $(string(v))"))
     end
     state = "{" * join(state, ",") * "}"
-    response = HTTP.put("http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))/state", body="$(state)")
-    return JSON.parse(String(response))
+    response = HTTP.request("PUT", "http://$(bridge.ip)/api/$(bridge.username)/lights/$(string(light))/state", body="$(state)")
+    return JSON.parse(String(response.body))
 end
 
 """
@@ -256,8 +256,8 @@ function setlights(bridge::PhilipsHueBridge, settings::Dict)
         push!(state,("\"$k\": $(string(v))"))
     end
     state = "{" * join(state, ",") * "}"
-    response = HTTP.put("http://$(bridge.ip)/api/$(bridge.username)/groups/0/action", body="$(state)")
-    return JSON.parse(String(response))
+    response = HTTP.request("PUT", "http://$(bridge.ip)/api/$(bridge.username)/groups/0/action", body="$(state)")
+    return JSON.parse(String(response.body))
 end
 
 """
@@ -274,8 +274,8 @@ generated bridge username.
 So we'll return the randomly generated key, or "" on failure.
 """
 function register(bridge_ip; devicetype="juliascript", blankusername="")
-    response     = HTTP.post("http://$(bridge_ip)/api/"; body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
-    responsedata = JSON.parse(String(response))
+    response     = HTTP.request("POST", "http://$(bridge_ip)/api/"; body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
+    responsedata = JSON.parse(String(response.body))
     # responsedata is probably:
     # 1-element Array{Any,1}:
     # ["error"=>["type"=>101,"description"=>"link button not pressed","address"=>"/"]]
