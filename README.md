@@ -4,8 +4,6 @@ A few simple functions to control Philips Hue light bulbs from Julia.
 
 Uses JSON, HTTP, and Colors packages.
 
-Works with Julia version 0.6.
-
 ## Summary
 
 To access and control the bridge you need to know its IP address, and register and obtain a 'username' (a string of hex) which you can use in subsequent sessions. This approach replaces the old 'username' system which Philips has already deprecated and will remove soon.
