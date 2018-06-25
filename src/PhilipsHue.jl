@@ -19,7 +19,7 @@ export  PhilipsHueBridge,
         register,
         initialize
 
-type PhilipsHueBridge
+mutable struct PhilipsHueBridge
     ip::AbstractString
     username:: AbstractString
     function PhilipsHueBridge(ip, username = "")
