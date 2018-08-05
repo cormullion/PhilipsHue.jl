@@ -1,5 +1,3 @@
-__precompile__()
-
 module PhilipsHue
 
 using JSON, HTTP, Colors
@@ -91,13 +89,12 @@ end
 
 Return true if the bridge has been initialized, and there is a connection to the portal.
 """
-
 function isinitialized(bridge::PhilipsHueBridge)
-#    if getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
+    if getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
         return true
-#    else
+    else
         return false
-#    end
+    end
 end
 
 """
@@ -106,13 +103,13 @@ end
 Read the bridge's IP settings from the [meethue.com]("https://www.meethue.com/api/nupnp") website.
 """
 function getIP()
-    response = HTTP.get("https://www.meethue.com/api/nupnp")
-    # this url sometimes redirects, we should follow...
+    response = HTTP.request("GET", "https://www.meethue.com/api/nupnp")
+    # this url sometimes redirect, we should follow...
     if response.status == 302
         println("trying curl instead, in case of redirects")
         bridgeinfo = JSON.parse(readstring(`curl -sL http://www.meethue.com/api/nupnp`))
     else
-        bridgeinfo = JSON.parse(String(response))
+        bridgeinfo = JSON.parse(String(response.body))
     end
     return bridgeinfo[1]["internalipaddress"]
 end
@@ -249,7 +246,6 @@ If keys are omitted, that aspect of the light won't be changed.
 
 Keys are AbstractStrings, values can be numeric and will get converted to AbstractStrings
 """
-
 function setlights(bridge::PhilipsHueBridge, settings::Dict)
     state = AbstractString[]
     for (k, v) in settings
