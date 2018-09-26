@@ -17,7 +17,7 @@ export  PhilipsHueBridge,
         register,
         initialize
 
-type PhilipsHueBridge
+struct PhilipsHueBridge
     ip::AbstractString
     username:: AbstractString
     function PhilipsHueBridge(ip, username = "")
@@ -90,7 +90,7 @@ end
 Return true if the bridge has been initialized, and there is a connection to the portal.
 """
 function isinitialized(bridge::PhilipsHueBridge)
-    if getbridgeconfig(bridge), "portalconnection", "not connected") == "connected"
+    if getbridgeconfig(bridge)["portalconnection"] == "connected"
         return true
     else
         return false

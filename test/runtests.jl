@@ -4,7 +4,7 @@ println("loaded PhilipsHue")
 
 # these will have to be set to valid values before you run the test
 
-B = PhilipsHueBridge("192.168.1.10"      , "PHtB7h1lkkDScH9Ln4JJpeke3V3lIqZMV9Ry5PkQ")
+B = PhilipsHueBridge("192.168.1.2"      , "PHtB7h1lkkDScH9Ln4JJpeke3V3lIqZMV9Ry5PkQ")
 
 lightnumbers = getlightnumbers(B)
 
