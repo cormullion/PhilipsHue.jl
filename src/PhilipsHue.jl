@@ -17,7 +17,7 @@ export  PhilipsHueBridge,
         register,
         initialize
 
-struct PhilipsHueBridge
+mutable struct PhilipsHueBridge
     ip::AbstractString
     username:: AbstractString
     function PhilipsHueBridge(ip, username = "")
@@ -270,7 +270,7 @@ generated bridge username.
 So we'll return the randomly generated key, or "" on failure.
 """
 function register(bridge_ip; devicetype="juliascript", blankusername="")
-    response     = HTTP.request("POST", "http://$(bridge_ip)/api/"; body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
+    response     = HTTP.request("POST", "http://$(bridge_ip)/api/", body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
     responsedata = JSON.parse(String(response.body))
     # responsedata is probably:
     # 1-element Array{Any,1}:
@@ -278,8 +278,8 @@ function register(bridge_ip; devicetype="juliascript", blankusername="")
     if responsedata[1][first(keys(responsedata[1]))]["description"] == "link button not pressed"
         println("register(): Quick, you have ten seconds to press the button on the bridge!")
         sleep(10)
-        response = HTTP.post("http://$(bridge_ip)/api/"; body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
-        responsedata = JSON.parse(String(response))
+        response = HTTP.post("http://$(bridge_ip)/api/", body="{\"devicetype\":\"$(devicetype)#$(blankusername)\"}")
+        responsedata = JSON.parse(String(response.body))
         if first(keys(responsedata[1])) == "success"
             println("register(): Successfully registered $devicetype with the bridge at $bridge_ip")
             # returns username which is randomly generated key
