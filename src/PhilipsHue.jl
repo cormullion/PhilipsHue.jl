@@ -79,7 +79,7 @@ function initialize(bridge::PhilipsHueBridge; devicetype="juliascript#user1")
         println("your username is $username")
         return true
     else
-        warn("initialize(): Registration failed")
+        @warn("initialize(): Registration failed")
         return false
     end
 end
@@ -113,7 +113,7 @@ function getIP()
     # this url sometimes redirect, we should follow...
     if response.status == 302
         println("trying curl instead, in case of redirects")
-        bridgeinfo = JSON.parse(readstring(`curl -sL http://www.meethue.com/api/nupnp`))
+        bridgeinfo = JSON.parse(read(`curl -sL http://www.meethue.com/api/nupnp`, String))
     else
         bridgeinfo = JSON.parse(String(response.body))
     end
