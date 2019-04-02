@@ -90,13 +90,19 @@ end
 Return true if the bridge has been initialized, and there is a connection to the portal.
 """
 function isinitialized(bridge::PhilipsHueBridge)
-    if getbridgeconfig(bridge)["portalconnection"] == "connected"
-        return true
-    else
-        return false
+    result = false
+    try
+        if getbridgeconfig(bridge)["portalconnection"] == "connected"
+            result = true
+        else
+            result = false
+        end
+    catch e
+        println("Bridge isn't initialized: error was $e")
+        result = false
     end
+    return result
 end
-
 """
     getIP()
 
