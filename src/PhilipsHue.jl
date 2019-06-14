@@ -1,3 +1,13 @@
+"""
+The PhilipsHue module provides functions for controlling the lights on a PhilipsHue bridge.
+
+Quick start:
+```
+B = PhilipsHueBridge("192.168.1.2")
+initialize(B; devicetype="juliascript#user1") # now run to the bridge!
+testlights(B)
+```
+"""
 module PhilipsHue
 
 using JSON, HTTP, Colors
@@ -48,7 +58,7 @@ Returns true or false.
 For example:
 
     B = PhilipsHueBridge("192.168.1.2")
-    initialize(bridge::PhilipsHueBridge; devicetype="juliascript#user1")
+    initialize(B; devicetype="juliascript#user1")
     testlights(B)
 
     # B.username is something like "2e4bdae26d734a73aeec4c21d4fd6"
