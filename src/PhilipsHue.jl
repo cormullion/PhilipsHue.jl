@@ -50,7 +50,7 @@ Initialize a bridge for the first time, supplying a devicetype (app name).
 Registering this script with the bridge may require you to run to the bridge
 and press the button.
 
-The returned username is stored in the bridge.username. This is needed for
+The returned 'username' is stored in the bridge.username. This is needed for
 future use, so you should remember it.
 
 Returns true or false.
@@ -86,7 +86,7 @@ function initialize(bridge::PhilipsHueBridge; devicetype="juliascript#user1")
         println("initialize(): Registration successful")
         # save username in bridge
         bridge.username = username
-        println("your username is $username")
+        println("your 'username' is $username")
         return true
     else
         @warn("initialize(): Registration failed")
@@ -116,14 +116,14 @@ end
 """
     getIP()
 
-Read the bridge's IP settings from the [meethue.com]("https://www.meethue.com/api/nupnp") website.
+Read the bridge's IP settings from the [meethue.com]("https://discovery.meethue.com/") website.
 """
 function getIP()
-    response = HTTP.request("GET", "https://www.meethue.com/api/nupnp")
+    response = HTTP.request("GET", "https://discovery.meethue.com/")
     # this url sometimes redirect, we should follow...
     if response.status == 302
         println("trying curl instead, in case of redirects")
-        bridgeinfo = JSON.parse(read(`curl -sL http://www.meethue.com/api/nupnp`, String))
+        bridgeinfo = JSON.parse(read(`curl -sL https://discovery.meethue.com/`, String))
     else
         bridgeinfo = JSON.parse(String(response.body))
     end
@@ -275,7 +275,7 @@ end
 """
     register(bridge_ip; devicetype="juliascript", blankusername="")
 
-Register the devicetype and username with the bridge.
+Register the devicetype and 'username' with the bridge.
 
 Quoth Philips: If the username is not provided, a random key will be
 generated and returned in the response. Important! The

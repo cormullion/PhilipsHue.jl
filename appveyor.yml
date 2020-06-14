@@ -1,5 +1,6 @@
 environment:
   matrix:
+  - julia_version: 0.7
   - julia_version: 1.0
   - julia_version: latest
 
@@ -12,6 +13,9 @@ platform:
 matrix:
  allow_failures:
  - julia_version: latest
+
+cache:
+  - '%USERPROFILE%\.julia\artifacts'
 
 branches:
   only:

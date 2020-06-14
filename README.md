@@ -2,7 +2,7 @@
 
 ![juliaphilips logo](images/logo.png)
 
-A few simple functions to control Philips Hue light bulbs from Julia.
+Functions to control Philips Hue light bulbs from Julia.
 
 Uses JSON, HTTP, and Colors packages.
 
@@ -39,7 +39,7 @@ and the 'username' should also be stored in a field of B. Remember it!
 
 ### Once you know your username
 
-In a subsequent Julia session, or if you already know your username, you don't have to do this initialization, and can simply do:
+In a subsequent Julia session, or if you already know your 'username', you don't have to do this initialization, and can simply do:
 
     using PhilipsHue
     B = PhilipsHueBridge("192.168.1.2", "KbZxj8G5nBDsDYgqOmHicytLC-aTALLSEaJN")
