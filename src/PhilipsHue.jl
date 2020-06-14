@@ -173,7 +173,7 @@ Returns eg:
     [1, 3, 5, 6]
 """
 function getlightnumbers(bridge::PhilipsHueBridge)
-  return map(x -> parse(Int, x), collect(keys(getlights(bridge))))
+  return map(f -> parse(Int, f), collect(keys(getlights(bridge))))
 end
 
 """
